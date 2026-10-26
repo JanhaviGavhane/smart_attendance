@@ -1,0 +1,269 @@
+
+{% extends "base.html" %}
+
+{% block title %}Attendance Reports | Smart Attendance{% endblock %}
+
+{% block content %}
+
+<section class="welcome-card">
+    <h1>Attendance Reports</h1>
+    <p>View saved attendance records, compare present and absent students, and identify students below 75% attendance.</p>
+</section>
+
+<section class="table-card" style="padding: 20px; margin-bottom: 24px;">
+    <h2>Filter Reports</h2>
+
+    <form method="get" action="{{ url_for('reports.reports_home') }}"
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: end;">
+
+        <label>
+            Start Date
+            <input type="date" name="start_date" value="{{ start_date }}">
+        </label>
+
+        <label>
+            End Date
+            <input type="date" name="end_date" value="{{ end_date }}">
+        </label>
+
+        <label>
+            Subject
+            <select name="subject_id">
+                <option value="">All Subjects</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}"
+                    {% if subject_id and subject_id|string == subject.id|string %}selected{% endif %}>
+                    {{ subject.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Division
+            <select name="division">
+                <option value="">All Divisions</option>
+                {% for item in divisions %}
+                <option value="{{ item }}"
+                    {% if division == item %}selected{% endif %}>
+                    {{ item }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Lecture / Session
+            <select name="lecture_id">
+                <option value="">All Lectures</option>
+                {% for item in sessions %}
+                <option value="{{ item.id }}"
+                    {% if lecture_id and lecture_id|string == item.id|string %}selected{% endif %}>
+                    {{ item.session_date }} - {{ item.subject.name }} -
+                    {{ item.division }} - Session #{{ item.id }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Attendance Marking Method
+            <select name="method">
+                <option value="all" {% if method == "all" %}selected{% endif %}>
+                    All Methods
+                </option>
+                <option value="voice" {% if method == "voice" %}selected{% endif %}>
+                    Voice
+                </option>
+                <option value="manual" {% if method == "manual" %}selected{% endif %}>
+                    Manual
+                </option>
+            </select>
+        </label>
+
+        <button type="submit">Generate Report</button>
+
+        <a href="{{ url_for('reports.reports_home') }}"
+           style="display: inline-block; padding: 10px 16px; text-align: center;">
+            Clear Filters
+        </a>
+    </form>
+</section>
+
+<section class="table-card" style="padding: 20px; margin-bottom: 24px;">
+    <h2>Present vs Absent by Lecture</h2>
+
+    {% if chart_labels %}
+    <div style="position: relative; width: 100%; min-height: 280px;">
+        <canvas id="attendanceChart"></canvas>
+    </div>
+    {% else %}
+    <p>No saved attendance records match the selected filters.</p>
+    {% endif %}
+</section>
+
+<section class="table-card" style="padding: 20px; margin-bottom: 24px;">
+    <h2>Saved Lecture History</h2>
+
+    {% if session_rows %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Division</th>
+                    <th>Session ID</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Total Records</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in session_rows %}
+                <tr>
+                    <td>{{ row.date }}</td>
+                    <td>{{ row.subject }}</td>
+                    <td>{{ row.division }}</td>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.present }}</td>
+                    <td>{{ row.absent }}</td>
+                    <td>{{ row.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No saved lecture sessions match these filters.</p>
+    {% endif %}
+</section>
+
+<section class="table-card" style="padding: 20px; margin-bottom: 24px;">
+    <h2>Students Below 75% Attendance</h2>
+    <p>Attendance is calculated using the saved records matching the selected filters.</p>
+
+    {% if reports %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Division</th>
+                    <th>Lectures Attended</th>
+                    <th>Total Lectures</th>
+                    <th>Absent</th>
+                    <th>Attendance Percentage</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.roll_number }}</td>
+                    <td>{{ report.name }}</td>
+                    <td>{{ report.subject }}</td>
+                    <td>{{ report.division }}</td>
+                    <td>{{ report.present }}</td>
+                    <td>{{ report.total }}</td>
+                    <td>{{ report.total - report.present }}</td>
+                    <td>{{ report.percentage }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No students are below 75% attendance in the selected records.</p>
+    {% endif %}
+</section>
+
+<section class="table-card" style="padding: 20px;">
+    <h2>Lecture-wise Attendance Records</h2>
+
+    {% if attendance_details %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Session ID</th>
+                    <th>Subject</th>
+                    <th>Division</th>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Status</th>
+                    <th>Marked By</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for record in attendance_details %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.session_id }}</td>
+                    <td>{{ record.subject }}</td>
+                    <td>{{ record.division }}</td>
+                    <td>{{ record.roll_number }}</td>
+                    <td>{{ record.name }}</td>
+                    <td>{{ record.status }}</td>
+                    <td>{{ record.marked_by }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No attendance records are available for these filters.</p>
+    {% endif %}
+</section>
+
+{% if chart_labels %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const canvas = document.getElementById("attendanceChart");
+
+    if (!canvas || typeof Chart === "undefined") {
+        return;
+    }
+
+    new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: {{ chart_labels | tojson }},
+            datasets: [
+                {
+                    label: "Present",
+                    data: {{ chart_present | tojson }},
+                    backgroundColor: "#36a269"
+                },
+                {
+                    label: "Absent",
+                    data: {{ chart_absent | tojson }},
+                    backgroundColor: "#dc5555"
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+
+{% endblock %}

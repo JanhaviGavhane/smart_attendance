@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Smart Attendance{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+    <h1>Teacher Login</h1>
+    <p>Sign in to access Smart Attendance.</p>
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" maxlength="150" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+
+        <button type="submit" class="primary-button">Login</button>
+    </form>
+
+    <p class="auth-link">
+        New teacher?
+        <a href="{{ url_for('auth.register') }}">Create an account</a>
+    </p>
+</section>
+{% endblock %}

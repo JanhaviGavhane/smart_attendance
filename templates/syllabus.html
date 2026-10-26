@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Syllabus Tracker | Smart Attendance{% endblock %}
+
+{% block content %}
+
+<section class="welcome-card">
+    <h1>Syllabus Tracker</h1>
+    <p>Track completed and pending syllabus topics.</p>
+</section>
+
+<section class="auth-card">
+    <h2>Add Syllabus Topic</h2>
+
+    <form method="POST" action="{{ url_for('syllabus.syllabus_home') }}">
+        <label for="subject_name">Subject</label>
+        <input id="subject_name" name="subject_name" maxlength="100" required>
+
+        <label for="topic_name">Topic</label>
+        <input id="topic_name" name="topic_name" maxlength="200" required>
+
+        <button class="primary-button" type="submit">Add Topic</button>
+    </form>
+</section>
+
+<section class="table-card">
+    <h2>Syllabus Topics</h2>
+
+    {% if topics %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Topic</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for topic in topics %}
+                <tr>
+                    <td>{{ topic.subject_name }}</td>
+                    <td>{{ topic.topic_name }}</td>
+                    <td>{{ "Completed" if topic.is_completed else "Pending" }}</td>
+                    <td>
+                        <form method="POST"
+                              action="{{ url_for('syllabus.toggle_topic', topic_id=topic.id) }}">
+                            <button class="primary-button" type="submit">
+                                {{ "Mark Pending" if topic.is_completed else "Mark Completed" }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No syllabus topics added yet.</p>
+    {% endif %}
+</section>
+
+{% endblock %}

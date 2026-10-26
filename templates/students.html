@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Students | Smart Attendance{% endblock %}
+
+{% block content %}
+<section class="welcome-card">
+    <h1>Student Management</h1>
+    <p>Add students and organize them by division.</p>
+</section>
+
+<section class="auth-card student-form-card">
+    <h2>Add New Student</h2>
+
+    <form method="POST" action="{{ url_for('students.manage_students') }}">
+        <label for="roll_number">Roll Number</label>
+        <input
+            id="roll_number"
+            name="roll_number"
+            type="text"
+            maxlength="30"
+            required
+        >
+
+        <label for="name">Student Name</label>
+        <input
+            id="name"
+            name="name"
+            type="text"
+            maxlength="100"
+            required
+        >
+
+        <label for="division">Division</label>
+        <input
+            id="division"
+            name="division"
+            type="text"
+            maxlength="50"
+            placeholder="For example: A"
+            required
+        >
+
+        <button type="submit" class="primary-button">Add Student</button>
+    </form>
+</section>
+
+<section class="table-card">
+    <h2>Registered Students</h2>
+
+    {% if students %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Division</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.roll_number }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.division }}</td>
+                    <td>
+                        <form
+                            method="POST"
+                            action="{{ url_for('students.delete_student', student_id=student.id) }}"
+                            onsubmit="return confirm('Delete this student?');"
+                        >
+                            <button type="submit" class="delete-button">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No students have been added yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,8 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+instance/attendance_uploads/
+instance/*.db
+.pytest_cache/

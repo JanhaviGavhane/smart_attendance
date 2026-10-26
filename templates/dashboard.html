@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Smart Attendance{% endblock %}
+
+{% block content %}
+
+<section class="welcome-card">
+    <h1>Smart Attendance Dashboard</h1>
+    <p>Manage lecture attendance, syllabus progress, and reports.</p>
+</section>
+
+<section class="dashboard-grid">
+
+    <a class="feature-card feature-link"
+       href="{{ url_for('attendance.attendance_home') }}">
+        <h2>Attendance</h2>
+        <p>Take attendance using the microphone or upload a student file.</p>
+        <span class="status-label">Open Attendance</span>
+    </a>
+
+    <a class="feature-card feature-link"
+       href="{{ url_for('syllabus.syllabus_home') }}">
+        <h2>Syllabus Tracker</h2>
+        <p>Track completed and pending syllabus topics.</p>
+        <span class="status-label">Open Tracker</span>
+    </a>
+
+    <a class="feature-card feature-link"
+       href="{{ url_for('reports.reports_home') }}">
+        <h2>Reports</h2>
+        <p>Review attendance percentages and identify students below 75%.</p>
+        <span class="status-label">View Reports</span>
+    </a>
+
+</section>
+
+{% endblock %}
